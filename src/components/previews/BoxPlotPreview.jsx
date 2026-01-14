@@ -238,9 +238,10 @@ function BoxPlotPreview({ chartType, config, width, height }) {
                 width={boxWidth}
                 height={q1Y - q3Y}
                 fill={color}
-                fillOpacity={0.7}
                 stroke="#000000"
                 strokeWidth={1.5}
+                rx={4}
+                ry={4}
               />
               
               {/* Median line */}

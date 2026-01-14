@@ -163,7 +163,7 @@ function ScatterPlotPreview({ chartType, config, width, height }) {
             name={category}
             data={points} 
             fill={categoryColors[category]}
-            fillOpacity={config.markerAlpha || 0.7}
+            fillOpacity={config.markerAlpha || 1.0}
             stroke="#000000"
             strokeWidth={1}
           />

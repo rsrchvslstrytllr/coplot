@@ -122,7 +122,6 @@ function HistogramPreview({ chartType, config, width, height }) {
         <Bar 
           dataKey="count"
           fill={barColor}
-          fillOpacity={config.barAlpha || 0.7}
           stroke={config.showEdges ? '#000000' : 'none'}
           strokeWidth={config.showEdges ? 1 : 0}
         >

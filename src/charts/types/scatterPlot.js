@@ -62,7 +62,7 @@ export default {
     useRedsPalette: false,
     showGrid: true,
     markerSize: 100,
-    markerAlpha: 0.7,
+    markerAlpha: 1.0,
     showLegend: true,
     legendPosition: 'top',
     xlabel: 'Training Time (GPU Hours)',

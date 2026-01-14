@@ -130,7 +130,6 @@ bp = ax.boxplot(values,
 # Color each box
 for patch, color in zip(bp['boxes'], colors):
     patch.set_facecolor(color)
-    patch.set_alpha(0.7)
 ${titleCode(config)}
 ${axisLabelsCode(config)}
 

@@ -46,7 +46,6 @@ export default {
     showGrid: true,
     numBins: 12,
     showEdges: true,
-    barAlpha: 0.7,
     xlabel: 'Inference Time (ms)',
     ylabel: 'Frequency',
     title: '',
@@ -63,15 +62,6 @@ export default {
       min: 5,
       max: 25,
       step: 1,
-      unit: '',
-    },
-    {
-      key: 'barAlpha',
-      label: 'Bar Transparency',
-      type: 'slider',
-      min: 0.3,
-      max: 1.0,
-      step: 0.1,
       unit: '',
     },
     {
@@ -110,7 +100,6 @@ ${createFigure()}
 n, bins, patches = ax.hist(inference_times,
                            bins=${config.numBins || 12},
                            color='${config.color || '#4C6EE6'}',
-                           alpha=${config.barAlpha || 0.7},
                            edgecolor=${edgeColor},
                            linewidth=1.2)
 ${titleCode(config)}
