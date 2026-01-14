@@ -89,11 +89,12 @@ export default {
 
     return `${matplotlibSetup()}
 
-# Training time breakdown by phase
-models = ['ResNet', 'VGG', 'MobileNet', 'EfficientNet']
-training = [45, 60, 30, 50]
-validation = [35, 25, 40, 30]
-test = [20, 15, 25, 30]
+# ======== ADD YOUR DATA HERE ========
+models = ['ResNet', 'VGG', 'MobileNet', 'EfficientNet']  # Category labels
+training = [45, 60, 30, 50]  # Stack 1 values
+validation = [35, 25, 40, 30]  # Stack 2 values
+test = [20, 15, 25, 30]  # Stack 3 values
+# ====================================
 ${createFigure()}
 
 ${paletteCode}

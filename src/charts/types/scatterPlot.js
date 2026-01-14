@@ -126,6 +126,8 @@ export default {
       colors = "['#1E265C', '#4C6EE6', '#8FA6F9']";
     } else if (config.useRedsPalette) {
       colors = "['#662F24', '#C44B3D', '#FFA18C']";
+    } else if (config.useGreensPalette) {
+      colors = "['#16270D', '#5BBF8A', '#CFE9B4']";
     } else {
       // Default to multi-color palette
       colors = "['#2D4DB9', '#C44B3D', '#9E4FA5']";
@@ -133,21 +135,22 @@ export default {
 
     return `${matplotlibSetup()}
 
-# Sample AI model performance data
+# ======== ADD YOUR DATA HERE ========
 categories = {
     'Transformers': {
-        'x': [12, 18, 22, 35, 45, 48],
-        'y': [10, 11, 1, 20, 25, 18]
+        'x': [12, 18, 22, 35, 45, 48],  # X values for category 1
+        'y': [10, 11, 1, 20, 25, 18]  # Y values for category 1
     },
     'CNNs': {
-        'x': [25, 30, 32, 40, 33],
-        'y': [22, 17, 17, 50, 19]
+        'x': [25, 30, 32, 40, 33],  # X values for category 2
+        'y': [22, 17, 17, 50, 19]  # Y values for category 2
     },
     'Diffusion Models': {
-        'x': [21, 28, 34, 15, 47],
-        'y': [17, 2, 6, 4, 18]
+        'x': [21, 28, 34, 15, 47],  # X values for category 3
+        'y': [17, 2, 6, 4, 18]  # Y values for category 3
     }
 }
+# ====================================
 ${createFigure()}
 
 # Define colors for each model category

@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 
 function CodePanel({ code }) {
   const [copied, setCopied] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   const handleCopy = async () => {
     let success = false;
 
-    // Try modern Clipboard API first (HTTPS/localhost)
+    // Try modern Clipboard API first (HTTPS/localhost/Vercel)
     if (navigator.clipboard && window.isSecureContext) {
       try {
         await navigator.clipboard.writeText(code);
@@ -16,7 +17,7 @@ function CodePanel({ code }) {
       }
     }
 
-    // Fallback for HTTP (seamless, no alerts)
+    // Fallback for HTTP or when Clipboard API fails
     if (!success) {
       try {
         const textArea = document.createElement('textarea');
@@ -41,25 +42,51 @@ function CodePanel({ code }) {
     }
   };
 
+  const handleDownload = () => {
+    const blob = new Blob([code], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'chart.py';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
-    <div className="h-64 flex flex-col bg-white">
-      {/* Header with copy button */}
+    <div className={`${expanded ? 'flex-1' : 'h-64'} flex flex-col bg-white transition-all`}>
+      {/* Header with copy and download buttons */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-black">
         <span className="text-xs text-gray-500 uppercase tracking-wide">
           Generated Code
         </span>
-        <button
-          onClick={handleCopy}
-          className={`
-            text-xs px-3 py-1 border transition-colors
-            ${copied 
-              ? 'bg-black text-white border-black' 
-              : 'bg-white text-black border-black hover:bg-gray-100'
-            }
-          `}
-        >
-          {copied ? '✓ Copied' : 'Copy'}
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="text-xs px-3 py-1 border border-black bg-white text-black hover:bg-gray-100 transition-colors"
+          >
+            {expanded ? 'Collapse' : 'Expand'}
+          </button>
+          <button
+            onClick={handleDownload}
+            className="text-xs px-3 py-1 border border-black bg-white text-black hover:bg-gray-100 transition-colors"
+          >
+            Download .py
+          </button>
+          <button
+            onClick={handleCopy}
+            className={`
+              text-xs px-3 py-1 border transition-colors
+              ${copied 
+                ? 'bg-black text-white border-black' 
+                : 'bg-white text-black border-black hover:bg-gray-100'
+              }
+            `}
+          >
+            {copied ? 'Copied!' : 'Copy'}
+          </button>
+        </div>
       </div>
 
       {/* Code content */}

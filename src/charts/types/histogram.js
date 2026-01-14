@@ -92,7 +92,7 @@ export default {
 
     return `${matplotlibSetup()}
 
-# Sample inference time data (milliseconds)
+# ======== ADD YOUR DATA HERE ========
 inference_times = [
     45, 52, 48, 61, 55, 53, 49, 58, 62, 51,
     47, 56, 59, 54, 50, 63, 57, 46, 60, 52,
@@ -102,7 +102,8 @@ inference_times = [
     43, 68, 52, 57, 50, 63, 54, 48, 60, 53,
     66, 51, 56, 49, 61, 55, 58, 52, 64, 47,
     70, 54, 59, 50, 62, 53, 57, 48, 65, 51,
-]
+]  # Your continuous data values
+# ====================================
 ${createFigure()}
 
 # Create histogram

@@ -150,14 +150,15 @@ export default {
 
     return `${matplotlibSetup()}
 
-# Sample training data - Large Language Models comparison
-epochs = [0, 10, 20, 30, 40, 50, 60, 70]
+# ======== ADD YOUR DATA HERE ========
+epochs = [0, 10, 20, 30, 40, 50, 60, 70]  # X-axis values
 
 series_data = {
-    'GPT Models': [35, 58, 72, 81, 87, 91, 93, 94],
-    'BERT Models': [42, 61, 74, 82, 87, 90, 91.5, 92],
-    'LLaMA Models': [30, 54, 68, 78, 85, 89, 92, 94]
+    'GPT Models': [35, 58, 72, 81, 87, 91, 93, 94],  # Series 1
+    'BERT Models': [42, 61, 74, 82, 87, 90, 91.5, 92],  # Series 2
+    'LLaMA Models': [30, 54, 68, 78, 85, 89, 92, 94]  # Series 3
 }
+# ====================================
 ${createFigure()}
 
 # Define colors for each series

@@ -9,15 +9,14 @@
 export function matplotlibSetup() {
   return `import matplotlib.pyplot as plt
 import numpy as np
-import matplotlib.font_manager as fm
 
-# Load custom font
-font_path = 'fonts/CohereText-Regular.ttf'  # Adjust path as needed
-try:
-    prop = fm.FontProperties(fname=font_path)
-    plt.rcParams['font.family'] = prop.get_name()
-except:
-    print("Custom font not found, using default")
+# ======== OPTIONAL: Custom Font ========
+# Uncomment below to use a custom font (requires font file)
+# import matplotlib.font_manager as fm
+# font_path = 'path/to/your/font.ttf'
+# prop = fm.FontProperties(fname=font_path)
+# plt.rcParams['font.family'] = prop.get_name()
+# =======================================
 
 # Set darker styling for all text and lines
 plt.rcParams['text.color'] = '#000000'

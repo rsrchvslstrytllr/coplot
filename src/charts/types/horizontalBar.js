@@ -74,9 +74,10 @@ export default {
   generateCode: (config) => {
     return `${matplotlibSetup()}
 
-# Model inference time data (in milliseconds)
-models = ['BERT-Base', 'GPT-2', 'T5-Small', 'DistilBERT', 'RoBERTa']
-inference_time = [45.2, 78.5, 62.3, 28.7, 51.8]
+# ======== ADD YOUR DATA HERE ========
+models = ['BERT-Base', 'GPT-2', 'T5-Small', 'DistilBERT', 'RoBERTa']  # Category labels
+inference_time = [45.2, 78.5, 62.3, 28.7, 51.8]  # Values
+# ====================================
 ${sortingCode(config, 'inference_time', 'models')}
 ${createFigure()}
 

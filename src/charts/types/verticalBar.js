@@ -78,9 +78,10 @@ export default {
   generateCode: (config) => {
     return `${matplotlibSetup()}
 
-# Model accuracy data
-models = ['ResNet', 'VGG', 'MobileNet', 'EfficientNet', 'ViT']
-accuracy = [92.1, 88.5, 89.7, 94.3, 91.2]
+# ======== ADD YOUR DATA HERE ========
+models = ['ResNet', 'VGG', 'MobileNet', 'EfficientNet', 'ViT']  # Category labels
+accuracy = [92.1, 88.5, 89.7, 94.3, 91.2]  # Values
+# ====================================
 ${sortingCode(config, 'accuracy', 'models')}
 ${createFigure()}
 

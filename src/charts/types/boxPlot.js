@@ -99,13 +99,14 @@ export default {
 
     return `${matplotlibSetup()}
 
-# Sample AI model performance data (multiple benchmark runs per model)
+# ======== ADD YOUR DATA HERE ========
 data = {
-    'GPT-4': [82, 86, 89, 91, 93, 94, 95, 95, 96, 97, 98, 99, 99],
-    'Claude': [78, 82, 85, 88, 90, 91, 92, 93, 94, 95, 96, 97, 98],
-    'Gemini': [75, 80, 84, 87, 89, 90, 91, 92, 93, 94, 95, 96, 65],  # Note outlier at 65
-    'LLaMA': [70, 74, 78, 81, 84, 86, 87, 88, 90, 91, 93, 95, 97]
+    'GPT-4': [82, 86, 89, 91, 93, 94, 95, 95, 96, 97, 98, 99, 99],  # Category 1 values
+    'Claude': [78, 82, 85, 88, 90, 91, 92, 93, 94, 95, 96, 97, 98],  # Category 2 values
+    'Gemini': [75, 80, 84, 87, 89, 90, 91, 92, 93, 94, 95, 96, 65],  # Category 3 (with outlier)
+    'LLaMA': [70, 74, 78, 81, 84, 86, 87, 88, 90, 91, 93, 95, 97]  # Category 4 values
 }
+# ====================================
 
 # Prepare data for box plot
 models = list(data.keys())

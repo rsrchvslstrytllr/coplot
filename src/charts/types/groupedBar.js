@@ -92,11 +92,12 @@ export default {
 
     return `${matplotlibSetup()}
 
-# Training accuracy data across multiple runs
-epochs = ['Epoch 5', 'Epoch 10', 'Epoch 15', 'Epoch 20']
-run1 = [78.2, 85.3, 88.7, 90.5]
-run2 = [79.5, 86.1, 89.2, 91.1]
-run3 = [77.8, 84.9, 88.3, 90.2]
+# ======== ADD YOUR DATA HERE ========
+epochs = ['Epoch 5', 'Epoch 10', 'Epoch 15', 'Epoch 20']  # Category labels
+run1 = [78.2, 85.3, 88.7, 90.5]  # Series 1 values
+run2 = [79.5, 86.1, 89.2, 91.1]  # Series 2 values
+run3 = [77.8, 84.9, 88.3, 90.2]  # Series 3 values
+# ====================================
 ${createFigure()}
 
 ${paletteCode}

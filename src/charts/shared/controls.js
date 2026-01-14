@@ -3,7 +3,7 @@
  * Building blocks for chart control panels
  */
 
-import { SINGLE_COLORS } from './palettes';
+import { SINGLE_COLORS, BLUES_PALETTE, REDS_PALETTE, GREENS_PALETTE, MULTI_PALETTE } from './palettes';
 
 // ============================================
 // COLOR CONTROLS
@@ -11,7 +11,7 @@ import { SINGLE_COLORS } from './palettes';
 
 export const colorControl = {
   key: 'color',
-  label: 'Single Bar Color',
+  label: 'Single Color (or use palette below)',
   type: 'color',
   options: SINGLE_COLORS.map(c => c.value),
 };
@@ -21,10 +21,10 @@ export const paletteControl = {
   label: 'Color Palettes',
   type: 'paletteGroup',
   options: [
-    { key: 'useBluesPalette', label: 'Blues Palette' },
-    { key: 'useRedsPalette', label: 'Reds Palette' },
-    { key: 'useGreensPalette', label: 'Greens Palette' },
-    { key: 'useMultiColor', label: 'Multi-Color Palette' },
+    { key: 'useBluesPalette', label: 'Blues', colors: BLUES_PALETTE },
+    { key: 'useRedsPalette', label: 'Reds', colors: REDS_PALETTE },
+    { key: 'useGreensPalette', label: 'Greens', colors: GREENS_PALETTE },
+    { key: 'useMultiColor', label: 'Multi-Color', colors: MULTI_PALETTE },
   ],
 };
 
@@ -93,12 +93,12 @@ export const gridControl = {
 
 export const labelRotationControl = {
   key: 'labelRotation',
-  label: 'Label Rotation',
+  label: 'X-axis Label Rotation',
   type: 'slider',
   min: 0,
   max: 90,
   step: 15,
-  unit: 'Â°',
+  unit: '°',
 };
 
 export const showValuesControl = {
@@ -156,18 +156,6 @@ export const barOrderingControl = {
   ],
 };
 
-export const hatchPatternControl = {
-  key: 'hatchPattern',
-  label: 'Hatching Pattern',
-  type: 'select',
-  options: [
-    { label: 'None', value: 'none' },
-    { label: 'Forward Slash (/)', value: '/' },
-    { label: 'Backslash (\\)', value: '\\' },
-    { label: 'Vertical (|)', value: '|' },
-  ],
-};
-
 // ============================================
 // LEGEND CONTROLS
 // ============================================
@@ -217,7 +205,6 @@ export const colorControls = [
 
 export const barDisplayControls = [
   barOrderingControl,
-  hatchPatternControl,
   labelRotationControl,
   gridControl,
   showValuesControl,

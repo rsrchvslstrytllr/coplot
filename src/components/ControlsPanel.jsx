@@ -1,11 +1,17 @@
 import React from 'react';
 
-function ControlsPanel({ chartType, config, onChange }) {
+function ControlsPanel({ chartType, config, onChange, onReset }) {
   return (
     <div className="w-64 border-r border-black flex flex-col h-screen sticky top-0 flex-shrink-0">
       {/* Header - same height as sidebar header */}
-      <div className="h-14 px-4 border-b border-black flex items-center">
+      <div className="h-14 px-4 border-b border-black flex items-center justify-between">
         <h2 className="text-sm font-medium">{chartType.name}</h2>
+        <button
+          onClick={onReset}
+          className="text-xs px-2 py-1 border border-black hover:bg-gray-100 transition-colors"
+        >
+          Reset
+        </button>
       </div>
 
       {/* Scrollable controls */}
@@ -128,7 +134,18 @@ function ControlRenderer({ control, value, config, onChange }) {
                   checked={config[option.key] || false}
                   onChange={(e) => onChange(option.key, e.target.checked)}
                 />
-                <span>{option.label}</span>
+                <span className="w-16">{option.label}</span>
+                {option.colors && (
+                  <div className="flex gap-0.5">
+                    {option.colors.map((color, idx) => (
+                      <div
+                        key={idx}
+                        className="w-3 h-3"
+                        style={{ backgroundColor: color }}
+                      />
+                    ))}
+                  </div>
+                )}
               </label>
             ))}
           </div>
