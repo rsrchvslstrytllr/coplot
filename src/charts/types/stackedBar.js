@@ -4,6 +4,8 @@
 
 import {
   paletteControl,
+  numCategoriesControl,
+  numStacksControl,
   labelRotationControl,
   gridControl,
   showValuesControl,
@@ -25,6 +27,8 @@ import {
   finishCode,
 } from '../shared/codeSnippets';
 
+import { interpolatePalette, BLUES_PALETTE, REDS_PALETTE, GREENS_PALETTE, MULTI_PALETTE } from '../shared/palettes';
+
 const showLegendControl = {
   key: 'showLegend',
   label: 'Show Legend',
@@ -38,10 +42,10 @@ export default {
   description: 'Show composition of totals across categories',
   
   sampleData: [
-    { name: 'ResNet', training: 45, validation: 35, test: 20 },
-    { name: 'VGG', training: 60, validation: 25, test: 15 },
-    { name: 'MobileNet', training: 30, validation: 40, test: 25 },
-    { name: 'EfficientNet', training: 50, validation: 30, test: 30 },
+    { name: 'Cat 1', stack1: 45, stack2: 35, stack3: 20 },
+    { name: 'Cat 2', stack1: 60, stack2: 25, stack3: 15 },
+    { name: 'Cat 3', stack1: 30, stack2: 40, stack3: 25 },
+    { name: 'Cat 4', stack1: 50, stack2: 30, stack3: 30 },
   ],
   
   defaultConfig: {
@@ -49,12 +53,14 @@ export default {
     useMultiColor: false,
     useRedsPalette: false,
     useGreensPalette: false,
+    numCategories: 4,
+    numStacks: 3,
     labelRotation: 0,
     showGrid: true,
     showValues: false,
-    valueDecimals: 1,
+    valueDecimals: 0,
     ylabel: 'Time (hours)',
-    xlabel: 'Model Architecture',
+    xlabel: 'Model',
     title: '',
     yMin: '',
     yMax: '',
@@ -66,6 +72,8 @@ export default {
   
   controls: [
     paletteControl,
+    numCategoriesControl,
+    numStacksControl,
     labelRotationControl,
     gridControl,
     showValuesControl,
@@ -78,31 +86,62 @@ export default {
   generateCode: (config) => {
     const hasYMin = config.yMin && config.yMin.trim() !== '';
     const hasYMax = config.yMax && config.yMax.trim() !== '';
+    const numCategories = config.numCategories || 4;
+    const numStacks = config.numStacks || 3;
     
-    const paletteCode = config.useBluesPalette 
-      ? `colors = ['#1E265C', '#4C6EE6', '#8FA6F9']  # Blues palette`
-      : config.useRedsPalette 
-        ? `colors = ['#662F24', '#C44B3D', '#FFA18C']  # Reds palette`
-        : config.useGreensPalette
-          ? `colors = ['#16270D', '#5BBF8A', '#CFE9B4']  # Greens palette`
-          : `colors = ['#2D4DB9', '#C44B3D', '#9E4FA5']  # Multi-color palette`;
+    // Get the right palette
+    let palette = MULTI_PALETTE;
+    let paletteName = 'Multi-color';
+    if (config.useBluesPalette) { palette = BLUES_PALETTE; paletteName = 'Blues'; }
+    else if (config.useRedsPalette) { palette = REDS_PALETTE; paletteName = 'Reds'; }
+    else if (config.useGreensPalette) { palette = GREENS_PALETTE; paletteName = 'Greens'; }
+    
+    const colors = interpolatePalette(palette, numStacks);
+    
+    // Generate category labels
+    const categories = Array.from({ length: numCategories }, (_, i) => `Cat ${i + 1}`);
+    
+    // Generate stack data
+    const stackCode = Array.from({ length: numStacks }, (_, i) => {
+      const values = Array.from({ length: numCategories }, () => Math.floor(20 + Math.random() * 40));
+      return `stack${i + 1} = [${values.join(', ')}]  # Stack ${i + 1} values`;
+    }).join('\n');
+    
+    // Generate bar creation code with proper bottom stacking
+    const barCodes = Array.from({ length: numStacks }, (_, i) => {
+      if (i === 0) {
+        return `bars${i + 1} = ax.bar(categories, stack${i + 1}, label='Stack ${i + 1}', color=colors[${i}])`;
+      } else {
+        const bottomParts = Array.from({ length: i }, (_, j) => `np.array(stack${j + 1})`).join(' + ');
+        return `bars${i + 1} = ax.bar(categories, stack${i + 1}, bottom=${bottomParts}, label='Stack ${i + 1}', color=colors[${i}])`;
+      }
+    }).join('\n');
+    
+    // Generate bars list for value labels
+    const barsList = Array.from({ length: numStacks }, (_, i) => `bars${i + 1}`).join(', ');
 
     return `${matplotlibSetup()}
 
 # ======== ADD YOUR DATA HERE ========
-models = ['ResNet', 'VGG', 'MobileNet', 'EfficientNet']  # Category labels
-training = [45, 60, 30, 50]  # Stack 1 values
-validation = [35, 25, 40, 30]  # Stack 2 values
-test = [20, 15, 25, 30]  # Stack 3 values
+categories = ${JSON.stringify(categories)}  # Category labels
+${stackCode}
 # ====================================
 ${createFigure()}
 
-${paletteCode}
+# ${paletteName} palette (${numStacks} interpolated colors)
+colors = ${JSON.stringify(colors)}
 
 # Create stacked bars
-bars1 = ax.bar(models, training, label='Training', color=colors[0], alpha=0.85)
-bars2 = ax.bar(models, validation, bottom=training, label='Validation', color=colors[1], alpha=0.85)
-bars3 = ax.bar(models, test, bottom=np.array(training) + np.array(validation), label='Test', color=colors[2], alpha=0.85)
+${barCodes}
+
+${config.showValues ? `# Add value labels centered in each segment
+for bars in [${barsList}]:
+    for bar in bars:
+        height = bar.get_height()
+        if height > 0:
+            ax.text(bar.get_x() + bar.get_width()/2., bar.get_y() + height/2.,
+                    f'{height:.${config.valueDecimals || 0}f}',
+                    ha='center', va='center', fontsize=9, color='#000000')` : '# Value labels disabled'}
 ${titleCode(config)}
 ${axisLabelsCode(config)}
 ${labelRotationCode(config)}

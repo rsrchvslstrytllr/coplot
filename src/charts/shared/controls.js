@@ -28,6 +28,36 @@ export const paletteControl = {
   ],
 };
 
+export const numCategoriesControl = {
+  key: 'numCategories',
+  label: 'Number of Categories',
+  type: 'slider',
+  min: 2,
+  max: 10,
+  step: 1,
+  unit: '',
+};
+
+export const numSeriesControl = {
+  key: 'numSeries',
+  label: 'Number of Series',
+  type: 'slider',
+  min: 2,
+  max: 5,
+  step: 1,
+  unit: '',
+};
+
+export const numStacksControl = {
+  key: 'numStacks',
+  label: 'Number of Stacks',
+  type: 'slider',
+  min: 2,
+  max: 5,
+  step: 1,
+  unit: '',
+};
+
 // ============================================
 // AXIS CONTROLS
 // ============================================

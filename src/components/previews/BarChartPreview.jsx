@@ -18,6 +18,45 @@ import {
 } from 'recharts';
 import { getColors } from '../../charts/shared/palettes';
 
+// Generate dynamic sample data for simple bar charts
+function generateBarData(n) {
+  const data = [];
+  // Use seeded random for consistent preview
+  const values = [85.2, 78.5, 92.1, 88.7, 81.3, 76.9, 94.5, 83.2, 79.8, 91.4];
+  for (let i = 0; i < n; i++) {
+    data.push({ name: `Cat ${i + 1}`, value: values[i % values.length] });
+  }
+  return data;
+}
+
+// Generate dynamic sample data for grouped bar charts
+function generateGroupedData(numCategories, numSeries) {
+  const data = [];
+  const baseValues = [78.2, 85.3, 88.7, 90.5, 82.1, 86.4, 89.2, 91.8, 84.6, 87.9];
+  for (let i = 0; i < numCategories; i++) {
+    const item = { name: `Group ${i + 1}` };
+    for (let j = 0; j < numSeries; j++) {
+      item[`series${j + 1}`] = baseValues[(i + j * 3) % baseValues.length];
+    }
+    data.push(item);
+  }
+  return data;
+}
+
+// Generate dynamic sample data for stacked bar charts
+function generateStackedData(numCategories, numStacks) {
+  const data = [];
+  const baseValues = [45, 35, 20, 50, 30, 25, 40, 28, 32, 38];
+  for (let i = 0; i < numCategories; i++) {
+    const item = { name: `Cat ${i + 1}` };
+    for (let j = 0; j < numStacks; j++) {
+      item[`stack${j + 1}`] = baseValues[(i + j * 2) % baseValues.length];
+    }
+    data.push(item);
+  }
+  return data;
+}
+
 // Custom title component that positions based on chart type
 function ChartTitle({ title, hasLegend }) {
   if (!title) return null;
@@ -41,18 +80,28 @@ function ChartTitle({ title, hasLegend }) {
 }
 
 function BarChartPreview({ chartType, config, width, height }) {
-  // Process and sort data if needed
+  // Generate dynamic data based on chart type and config
   const data = useMemo(() => {
-    let processedData = [...chartType.sampleData];
+    let processedData;
+    
+    if (chartType.id === 'vertical-bar' || chartType.id === 'horizontal-bar') {
+      processedData = generateBarData(config.numCategories || 5);
+    } else if (chartType.id === 'grouped-bar') {
+      processedData = generateGroupedData(config.numCategories || 4, config.numSeries || 3);
+    } else if (chartType.id === 'stacked-bar') {
+      processedData = generateStackedData(config.numCategories || 4, config.numStacks || 3);
+    } else {
+      processedData = [...chartType.sampleData];
+    }
     
     if (config.barOrdering === 'ascending') {
-      processedData.sort((a, b) => a.value - b.value);
+      processedData.sort((a, b) => (a.value || 0) - (b.value || 0));
     } else if (config.barOrdering === 'descending') {
-      processedData.sort((a, b) => b.value - a.value);
+      processedData.sort((a, b) => (b.value || 0) - (a.value || 0));
     }
     
     return processedData;
-  }, [chartType.sampleData, config.barOrdering]);
+  }, [chartType.id, chartType.sampleData, config.numCategories, config.numSeries, config.numStacks, config.barOrdering]);
 
   // Get colors based on config
   const colors = useMemo(() => {
@@ -287,13 +336,8 @@ function BarChartPreview({ chartType, config, width, height }) {
 
   // Render grouped bar chart
   if (chartType.id === 'grouped-bar') {
-    const groupedColors = config.useBluesPalette 
-      ? ['#1E265C', '#4C6EE6', '#8FA6F9']
-      : config.useRedsPalette 
-        ? ['#662F24', '#C44B3D', '#FFA18C']
-        : config.useGreensPalette
-          ? ['#16270D', '#5BBF8A', '#CFE9B4']
-          : ['#2D4DB9', '#C44B3D', '#9E4FA5'];
+    const numSeries = config.numSeries || 3;
+    const seriesColors = getColors(config, numSeries);
 
     return (
       <div style={{ width, height, position: 'relative' }}>
@@ -313,7 +357,7 @@ function BarChartPreview({ chartType, config, width, height }) {
           width={width} 
           height={height}
           margin={{ top: config.title ? 60 : 40, right: 80, bottom: 60, left: 70 }}
-          barSize={20}
+          barSize={Math.max(8, 60 / numSeries)}
         >
           {config.showGrid && (
             <CartesianGrid 
@@ -362,36 +406,24 @@ function BarChartPreview({ chartType, config, width, height }) {
           />
         )}
         
-        <Bar dataKey="run1" name="Run 1" fill={groupedColors[0]} radius={[4, 4, 0, 0]}>
-          {config.showValues && (
-            <LabelList 
-              dataKey="run1" 
-              position="top" 
-              formatter={(value) => value.toFixed(config.valueDecimals || 1)}
-              style={{ fill: '#000000', fontSize: 9, fontWeight: 500 }}
-            />
-          )}
-        </Bar>
-        <Bar dataKey="run2" name="Run 2" fill={groupedColors[1]} radius={[4, 4, 0, 0]}>
-          {config.showValues && (
-            <LabelList 
-              dataKey="run2" 
-              position="top" 
-              formatter={(value) => value.toFixed(config.valueDecimals || 1)}
-              style={{ fill: '#000000', fontSize: 9, fontWeight: 500 }}
-            />
-          )}
-        </Bar>
-        <Bar dataKey="run3" name="Run 3" fill={groupedColors[2]} radius={[4, 4, 0, 0]}>
-          {config.showValues && (
-            <LabelList 
-              dataKey="run3" 
-              position="top" 
-              formatter={(value) => value.toFixed(config.valueDecimals || 1)}
-              style={{ fill: '#000000', fontSize: 9, fontWeight: 500 }}
-            />
-          )}
-        </Bar>
+        {Array.from({ length: numSeries }, (_, i) => (
+          <Bar 
+            key={`series${i + 1}`}
+            dataKey={`series${i + 1}`} 
+            name={`Series ${i + 1}`} 
+            fill={seriesColors[i]} 
+            radius={[4, 4, 0, 0]}
+          >
+            {config.showValues && (
+              <LabelList 
+                dataKey={`series${i + 1}`} 
+                position="top" 
+                formatter={(value) => value?.toFixed(config.valueDecimals || 1)}
+                style={{ fill: '#000000', fontSize: 9, fontWeight: 500 }}
+              />
+            )}
+          </Bar>
+        ))}
 
         {config.showReferenceLine && config.referenceValue && (
           <ReferenceLine 
@@ -413,13 +445,8 @@ function BarChartPreview({ chartType, config, width, height }) {
 
   // Render stacked bar chart
   if (chartType.id === 'stacked-bar') {
-    const stackColors = config.useBluesPalette 
-      ? ['#1E265C', '#4C6EE6', '#8FA6F9']
-      : config.useRedsPalette 
-        ? ['#662F24', '#C44B3D', '#FFA18C']
-        : config.useGreensPalette
-          ? ['#16270D', '#5BBF8A', '#CFE9B4']
-          : ['#2D4DB9', '#C44B3D', '#9E4FA5'];
+    const numStacks = config.numStacks || 3;
+    const stackColors = getColors(config, numStacks);
 
     return (
       <div style={{ width, height, position: 'relative' }}>
@@ -487,36 +514,25 @@ function BarChartPreview({ chartType, config, width, height }) {
           />
         )}
         
-        <Bar dataKey="training" name="Training" stackId="a" fill={stackColors[0]}>
-          {config.showValues && (
-            <LabelList 
-              dataKey="training" 
-              position="center" 
-              formatter={(value) => value.toFixed(config.valueDecimals || 0)}
-              style={{ fill: '#ffffff', fontSize: 10, fontWeight: 500 }}
-            />
-          )}
-        </Bar>
-        <Bar dataKey="validation" name="Validation" stackId="a" fill={stackColors[1]}>
-          {config.showValues && (
-            <LabelList 
-              dataKey="validation" 
-              position="center" 
-              formatter={(value) => value.toFixed(config.valueDecimals || 0)}
-              style={{ fill: '#ffffff', fontSize: 10, fontWeight: 500 }}
-            />
-          )}
-        </Bar>
-        <Bar dataKey="test" name="Test" stackId="a" fill={stackColors[2]} radius={[4, 4, 0, 0]}>
-          {config.showValues && (
-            <LabelList 
-              dataKey="test" 
-              position="center" 
-              formatter={(value) => value.toFixed(config.valueDecimals || 0)}
-              style={{ fill: '#000000', fontSize: 10, fontWeight: 500 }}
-            />
-          )}
-        </Bar>
+        {Array.from({ length: numStacks }, (_, i) => (
+          <Bar 
+            key={`stack${i + 1}`}
+            dataKey={`stack${i + 1}`} 
+            name={`Stack ${i + 1}`} 
+            stackId="a" 
+            fill={stackColors[i]}
+            radius={i === numStacks - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
+          >
+            {config.showValues && (
+              <LabelList 
+                dataKey={`stack${i + 1}`} 
+                position="center" 
+                formatter={(value) => value?.toFixed(config.valueDecimals || 0)}
+                style={{ fill: i === numStacks - 1 ? '#000000' : '#ffffff', fontSize: 10, fontWeight: 500 }}
+              />
+            )}
+          </Bar>
+        ))}
 
         {config.showReferenceLine && config.referenceValue && (
           <ReferenceLine 

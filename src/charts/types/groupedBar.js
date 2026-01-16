@@ -4,6 +4,8 @@
 
 import {
   paletteControl,
+  numCategoriesControl,
+  numSeriesControl,
   barOrderingControl,
   labelRotationControl,
   gridControl,
@@ -26,6 +28,8 @@ import {
   finishCode,
 } from '../shared/codeSnippets';
 
+import { interpolatePalette, BLUES_PALETTE, REDS_PALETTE, GREENS_PALETTE, MULTI_PALETTE } from '../shared/palettes';
+
 const showLegendControl = {
   key: 'showLegend',
   label: 'Show Legend',
@@ -39,10 +43,10 @@ export default {
   description: 'Compare multiple metrics across categories',
   
   sampleData: [
-    { name: 'Epoch 5', run1: 78.2, run2: 79.5, run3: 77.8 },
-    { name: 'Epoch 10', run1: 85.3, run2: 86.1, run3: 84.9 },
-    { name: 'Epoch 15', run1: 88.7, run2: 89.2, run3: 88.3 },
-    { name: 'Epoch 20', run1: 90.5, run2: 91.1, run3: 90.2 },
+    { name: 'Group 1', series1: 78.2, series2: 79.5, series3: 77.8 },
+    { name: 'Group 2', series1: 85.3, series2: 86.1, series3: 84.9 },
+    { name: 'Group 3', series1: 88.7, series2: 89.2, series3: 88.3 },
+    { name: 'Group 4', series1: 90.5, series2: 91.1, series3: 90.2 },
   ],
   
   defaultConfig: {
@@ -50,6 +54,8 @@ export default {
     useMultiColor: false,
     useRedsPalette: false,
     useGreensPalette: false,
+    numCategories: 4,
+    numSeries: 3,
     labelRotation: 0,
     showGrid: true,
     showValues: false,
@@ -68,6 +74,8 @@ export default {
   
   controls: [
     paletteControl,
+    numCategoriesControl,
+    numSeriesControl,
     barOrderingControl,
     labelRotationControl,
     gridControl,
@@ -81,41 +89,67 @@ export default {
   generateCode: (config) => {
     const hasYMin = config.yMin && config.yMin.trim() !== '';
     const hasYMax = config.yMax && config.yMax.trim() !== '';
+    const numCategories = config.numCategories || 4;
+    const numSeries = config.numSeries || 3;
     
-    const paletteCode = config.useBluesPalette 
-      ? `colors = ['#1E265C', '#4C6EE6', '#8FA6F9']  # Blues palette`
-      : config.useRedsPalette 
-        ? `colors = ['#662F24', '#C44B3D', '#FFA18C']  # Reds palette`
-        : config.useGreensPalette
-          ? `colors = ['#16270D', '#5BBF8A', '#CFE9B4']  # Greens palette`
-          : `colors = ['#2D4DB9', '#C44B3D', '#9E4FA5']  # Multi-color palette`;
+    // Get the right palette
+    let palette = MULTI_PALETTE;
+    let paletteName = 'Multi-color';
+    if (config.useBluesPalette) { palette = BLUES_PALETTE; paletteName = 'Blues'; }
+    else if (config.useRedsPalette) { palette = REDS_PALETTE; paletteName = 'Reds'; }
+    else if (config.useGreensPalette) { palette = GREENS_PALETTE; paletteName = 'Greens'; }
+    
+    const colors = interpolatePalette(palette, numSeries);
+    
+    // Generate category labels
+    const categories = Array.from({ length: numCategories }, (_, i) => `Group ${i + 1}`);
+    
+    // Generate series data
+    const seriesCode = Array.from({ length: numSeries }, (_, i) => {
+      const values = Array.from({ length: numCategories }, () => (75 + Math.random() * 20).toFixed(1));
+      return `series${i + 1} = [${values.join(', ')}]  # Series ${i + 1} values`;
+    }).join('\n');
+    
+    // Generate bar creation code
+    const width = (0.8 / numSeries).toFixed(2);
+    const barCodes = Array.from({ length: numSeries }, (_, i) => {
+      const offset = ((i - (numSeries - 1) / 2) * parseFloat(width)).toFixed(2);
+      return `bars${i + 1} = ax.bar(x + ${offset}, series${i + 1}, ${width}, label='Series ${i + 1}', color=colors[${i}])`;
+    }).join('\n');
+    
+    // Generate series list for value labels
+    const barsList = Array.from({ length: numSeries }, (_, i) => `bars${i + 1}`).join(', ');
 
     return `${matplotlibSetup()}
 
 # ======== ADD YOUR DATA HERE ========
-epochs = ['Epoch 5', 'Epoch 10', 'Epoch 15', 'Epoch 20']  # Category labels
-run1 = [78.2, 85.3, 88.7, 90.5]  # Series 1 values
-run2 = [79.5, 86.1, 89.2, 91.1]  # Series 2 values
-run3 = [77.8, 84.9, 88.3, 90.2]  # Series 3 values
+categories = ${JSON.stringify(categories)}  # Group labels
+${seriesCode}
 # ====================================
 ${createFigure()}
 
-${paletteCode}
+# ${paletteName} palette (${numSeries} interpolated colors)
+colors = ${JSON.stringify(colors)}
 
 # Set up bar positions
-x = np.arange(len(epochs))
-width = 0.25
+x = np.arange(len(categories))
 
 # Create grouped bars
-bars1 = ax.bar(x - width, run1, width, label='Run 1', color=colors[0], alpha=0.85)
-bars2 = ax.bar(x, run2, width, label='Run 2', color=colors[1], alpha=0.85)
-bars3 = ax.bar(x + width, run3, width, label='Run 3', color=colors[2], alpha=0.85)
+${barCodes}
+
+${config.showValues ? `# Add value labels on bars
+for bars in [${barsList}]:
+    for bar in bars:
+        height = bar.get_height()
+        ax.text(bar.get_x() + bar.get_width()/2., height,
+                f'{height:.${config.valueDecimals || 1}f}',
+                ha='center', va='bottom', fontsize=9, color='#000000')` : '# Value labels disabled'}
 ${titleCode(config)}
 ${axisLabelsCode(config)}
 
 # Set x-axis ticks
 ax.set_xticks(x)
-ax.set_xticklabels(epochs)
+ax.set_xticklabels(categories)
 ${labelRotationCode(config)}
 
 # Add grid
