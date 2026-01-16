@@ -14,7 +14,6 @@ import {
   Cell,
   LabelList,
   Legend,
-  Text,
 } from 'recharts';
 import { getColors } from '../../charts/shared/palettes';
 
@@ -57,28 +56,6 @@ function generateStackedData(numCategories, numStacks) {
   return data;
 }
 
-// Custom title component that positions based on chart type
-function ChartTitle({ title, hasLegend }) {
-  if (!title) return null;
-  
-  // Position title lower if there's a legend above it
-  const topOffset = hasLegend ? 45 : 12;
-  
-  return (
-    <text
-      x={70}
-      y={topOffset}
-      style={{
-        fontSize: 18,
-        fontWeight: 600,
-        fill: '#000000',
-      }}
-    >
-      {title}
-    </text>
-  );
-}
-
 function BarChartPreview({ chartType, config, width, height }) {
   // Generate dynamic data based on chart type and config
   const data = useMemo(() => {
@@ -110,9 +87,8 @@ function BarChartPreview({ chartType, config, width, height }) {
 
   // Calculate Y domain with smart defaults
   const yDomain = useMemo(() => {
-    const values = data.map(d => d.value);
+    const values = data.map(d => d.value).filter(v => v !== undefined);
     const min = Math.min(...values);
-    const max = Math.max(...values);
     
     // If user specified values, use them
     const yMin = config.yMin && config.yMin.trim() !== '' 

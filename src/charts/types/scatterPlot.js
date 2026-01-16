@@ -26,9 +26,7 @@ import {
   finishCode,
 } from '../shared/codeSnippets';
 
-import { generateColorCode } from '../shared/palettes';
-
-export default {
+const scatterPlot = {
   id: 'scatter-plot',
   name: 'Scatter Plot',
   category: 'scatter',
@@ -184,3 +182,5 @@ ${spineCode()}
 ${finishCode('scatter_plot')}`;
   },
 };
+
+export default scatterPlot;

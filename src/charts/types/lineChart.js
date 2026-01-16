@@ -26,7 +26,7 @@ import {
   finishCode,
 } from '../shared/codeSnippets';
 
-export default {
+const lineChart = {
   id: 'line-chart',
   name: 'Line Chart',
   category: 'line',
@@ -190,3 +190,5 @@ ${spineCode()}
 ${finishCode('line_chart')}`;
   },
 };
+
+export default lineChart;

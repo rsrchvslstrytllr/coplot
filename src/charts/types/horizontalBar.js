@@ -29,7 +29,7 @@ import {
 
 import { generateColorCode } from '../shared/palettes';
 
-export default {
+const horizontalBar = {
   id: 'horizontal-bar',
   name: 'Horizontal Bar Chart',
   category: 'bar',
@@ -109,3 +109,5 @@ ${spineCode()}
 ${finishCode('horizontal_bar_chart')}`;
   },
 };
+
+export default horizontalBar;

@@ -20,7 +20,6 @@ import {
   titleCode,
   gridCode,
   axisLabelsCode,
-  yAxisRangeCode,
   referenceLineCode,
   labelRotationCode,
   spineCode,
@@ -35,7 +34,7 @@ const showLegendControl = {
   type: 'toggle',
 };
 
-export default {
+const stackedBar = {
   id: 'stacked-bar',
   name: 'Stacked Bar Chart',
   category: 'bar',
@@ -159,3 +158,5 @@ ${spineCode()}
 ${finishCode('stacked_bar_chart')}`;
   },
 };
+
+export default stackedBar;

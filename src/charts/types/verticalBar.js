@@ -40,7 +40,7 @@ function generateSampleData(n) {
   return data;
 }
 
-export default {
+const verticalBar = {
   id: 'vertical-bar',
   name: 'Vertical Bar Chart',
   category: 'bar',
@@ -127,3 +127,5 @@ ${spineCode()}
 ${finishCode('vertical_bar_chart')}`;
   },
 };
+
+export default verticalBar;
