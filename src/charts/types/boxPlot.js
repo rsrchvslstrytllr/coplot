@@ -23,7 +23,7 @@ import {
   finishCode,
 } from '../shared/codeSnippets';
 
-export default {
+const boxPlot = {
   id: 'box-plot',
   name: 'Box Plot',
   category: 'distribution',
@@ -142,3 +142,5 @@ ${spineCode()}
 ${finishCode('box_plot')}`;
   },
 };
+
+export default boxPlot;

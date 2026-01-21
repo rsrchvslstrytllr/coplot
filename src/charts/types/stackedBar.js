@@ -26,6 +26,19 @@ import {
   finishCode,
 } from '../shared/codeSnippets';
 
+import {
+  seabornSetup,
+  seabornCreateFigure,
+  seabornTitleCode,
+  seabornGridCode,
+  seabornAxisLabelsCode,
+  seabornYAxisRangeCode,
+  seabornReferenceLineCode,
+  seabornLabelRotationCode,
+  seabornSpineCode,
+  seabornFinishCode,
+} from '../shared/seabornSnippets';
+
 import { interpolatePalette, BLUES_PALETTE, REDS_PALETTE, GREENS_PALETTE, MULTI_PALETTE } from '../shared/palettes';
 
 const showLegendControl = {
@@ -54,6 +67,7 @@ const stackedBar = {
     useGreensPalette: false,
     numCategories: 4,
     numStacks: 3,
+    outputFormat: 'matplotlib',
     labelRotation: 0,
     showGrid: true,
     showValues: false,
@@ -100,6 +114,57 @@ const stackedBar = {
     // Generate category labels
     const categories = Array.from({ length: numCategories }, (_, i) => `Cat ${i + 1}`);
     
+    // Seaborn output - Note: seaborn doesn't have native stacked bar, so we use pandas plot
+    if (config.outputFormat === 'seaborn') {
+      // Generate wide-form DataFrame for stacked bar
+      const stackLines = [];
+      for (let j = 0; j < numStacks; j++) {
+        const values = Array.from({ length: numCategories }, () => Math.floor(20 + Math.random() * 40));
+        stackLines.push(`    'Stack ${j + 1}': [${values.join(', ')}]`);
+      }
+      
+      return `${seabornSetup()}
+
+# ======== ADD YOUR DATA HERE ========
+# Wide-form DataFrame for stacked bar
+df = pd.DataFrame({
+    'category': ${JSON.stringify(categories)},
+${stackLines.join(',\n')}
+})
+df = df.set_index('category')
+# ====================================
+${seabornCreateFigure()}
+
+# ${paletteName} palette (${numStacks} interpolated colors)
+colors = ${JSON.stringify(colors)}
+
+# Create stacked bar chart using pandas plot (seaborn doesn't have native stacked bar)
+df.plot(kind='bar', stacked=True, color=colors, edgecolor='#000000', 
+        linewidth=1.0, ax=ax, width=0.7)
+${seabornTitleCode(config)}
+${seabornAxisLabelsCode(config)}
+${seabornLabelRotationCode(config)}
+
+# Add grid
+${seabornGridCode(config, 'y')}
+
+${config.showValues ? `# Add value labels centered in each segment
+for container in ax.containers:
+    ax.bar_label(container, fmt='%.${config.valueDecimals || 0}f', fontsize=9, 
+                 color='#000000', label_type='center')` : '# Value labels disabled'}
+
+# Set y-axis range
+${seabornYAxisRangeCode(config)}
+
+${config.showLegend ? `# Customize legend
+ax.legend(title='', loc='upper right', fontsize=10)` : `# Remove legend
+ax.legend_.remove()`}
+${seabornReferenceLineCode(config, 'horizontal')}
+${seabornSpineCode()}
+${seabornFinishCode('stacked_bar_chart')}`;
+    }
+    
+    // Matplotlib output (default)
     // Generate stack data
     const stackCode = Array.from({ length: numStacks }, (_, i) => {
       const values = Array.from({ length: numCategories }, () => Math.floor(20 + Math.random() * 40));

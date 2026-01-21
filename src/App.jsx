@@ -30,7 +30,7 @@ function App() {
     if (selectedChart) {
       setConfig(selectedChart.defaultConfig);
     }
-  }, [selectedChartId]);
+  }, [selectedChartId, selectedChart]);
 
   const handleChartSelect = (chartId) => {
     setSelectedChartId(chartId);
@@ -39,12 +39,6 @@ function App() {
   const handleGoHome = () => {
     setSelectedChartId(null);
     setConfig({});
-  };
-
-  const handleReset = () => {
-    if (selectedChart) {
-      setConfig(selectedChart.defaultConfig);
-    }
   };
 
   const handleConfigChange = (key, value) => {
@@ -74,8 +68,11 @@ function App() {
     });
   };
 
-  // Generate code
+  // Generate code (handles both matplotlib and seaborn based on config.outputFormat)
   const generatedCode = selectedChart ? selectedChart.generateCode(config) : '';
+  
+  // Check if chart supports seaborn (has outputFormat in defaultConfig)
+  const supportsSeaborn = selectedChart?.defaultConfig?.outputFormat !== undefined;
 
   // Show mobile gate for small screens
   if (isMobile) {
@@ -98,7 +95,6 @@ function App() {
           chartType={selectedChart}
           config={config}
           onChange={handleConfigChange}
-          onReset={handleReset}
         />
       )}
 
@@ -110,7 +106,12 @@ function App() {
               chartType={selectedChart}
               config={config}
             />
-            <CodePanel code={generatedCode} />
+            <CodePanel 
+              code={generatedCode}
+              supportsSeaborn={supportsSeaborn}
+              outputFormat={config.outputFormat}
+              onOutputFormatChange={(value) => handleConfigChange('outputFormat', value)}
+            />
           </>
         ) : (
           <HomeState />
@@ -161,13 +162,13 @@ function SparkBarChart() {
     return () => clearTimeout(timer);
   }, []);
 
-  const barHeights = [3, 6, 4, 7, 4,9,7];
+  const barHeights = [3, 6, 4, 7, 4];
   const sparkSize = 32;
-  const barGap = 30;
+  const barGap = 10;
   const barWidth = sparkSize;
   
   // Spacing multiplier - sparks spread apart on hover
-  const spacingMultiplier = isHovered ? 1.4 : 1;
+  const spacingMultiplier = isHovered ? 1.6 : 1.2;
   const effectiveSparkHeight = sparkSize * spacingMultiplier;
   
   // Generate all sparks with their positions
@@ -191,7 +192,7 @@ function SparkBarChart() {
     }
   });
 
-  const maxHeight = maxBarHeight * sparkSize * 1.4; // Account for expanded state
+  const maxHeight = maxBarHeight * sparkSize * 1.6; // Account for expanded state
   const totalWidth = 5 * (barWidth + barGap) - barGap;
 
   return (
@@ -232,7 +233,7 @@ function SparkBarChart() {
 // Home state when no chart is selected
 function HomeState() {
   return (
-    <div className="flex-1 flex items-start justify-center pt-32 p-12">
+    <div className="flex-1 flex items-center justify-center p-12">
       <div className="flex items-end gap-12">
         {/* Left side - text content */}
         <div>

@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 
-function CodePanel({ code }) {
+function CodePanel({ code, supportsSeaborn, outputFormat, onOutputFormatChange }) {
   const [copied, setCopied] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
   const handleCopy = async () => {
     let success = false;
 
-    // Try modern Clipboard API first (HTTPS/localhost/Vercel)
+    // Try modern Clipboard API first (HTTPS/localhost)
     if (navigator.clipboard && window.isSecureContext) {
       try {
         await navigator.clipboard.writeText(code);
@@ -17,7 +17,7 @@ function CodePanel({ code }) {
       }
     }
 
-    // Fallback for HTTP or when Clipboard API fails
+    // Fallback for HTTP (seamless, no alerts)
     if (!success) {
       try {
         const textArea = document.createElement('textarea');
@@ -42,38 +42,36 @@ function CodePanel({ code }) {
     }
   };
 
-  const handleDownload = () => {
-    const blob = new Blob([code], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'chart.py';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
-
   return (
-    <div className={`${expanded ? 'flex-1' : 'h-64'} flex flex-col bg-white transition-all`}>
-      {/* Header with copy and download buttons */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-black">
+    <div className={`${expanded ? 'flex-1' : 'h-64'} flex flex-col bg-white border-t border-black transition-all overflow-hidden`}>
+      {/* Header with format toggle and copy button */}
+      <div className="flex items-center justify-between px-4 py-2 border-b border-black flex-shrink-0">
         <span className="text-xs text-gray-500 uppercase tracking-wide">
           Generated Code
         </span>
-        <div className="flex gap-2">
+        
+        <div className="flex items-center gap-3">
+          {/* Output format toggle - only show if chart supports seaborn */}
+          {supportsSeaborn && (
+            <select
+              value={outputFormat || 'matplotlib'}
+              onChange={(e) => onOutputFormatChange && onOutputFormatChange(e.target.value)}
+              className="text-xs px-2 py-1 border border-black bg-white"
+            >
+              <option value="matplotlib">Matplotlib</option>
+              <option value="seaborn">Seaborn</option>
+            </select>
+          )}
+          
+          {/* Expand/Collapse button */}
           <button
             onClick={() => setExpanded(!expanded)}
             className="text-xs px-3 py-1 border border-black bg-white text-black hover:bg-gray-100 transition-colors"
           >
             {expanded ? 'Collapse' : 'Expand'}
           </button>
-          <button
-            onClick={handleDownload}
-            className="text-xs px-3 py-1 border border-black bg-white text-black hover:bg-gray-100 transition-colors"
-          >
-            Download .py
-          </button>
+          
+          {/* Copy button */}
           <button
             onClick={handleCopy}
             className={`
@@ -90,8 +88,8 @@ function CodePanel({ code }) {
       </div>
 
       {/* Code content */}
-      <div className="flex-1 overflow-auto p-4 bg-gray-50">
-        <pre className="text-xs leading-relaxed">
+      <div className="flex-1 p-4 bg-gray-50 overflow-y-auto min-h-0">
+        <pre className="text-xs leading-relaxed whitespace-pre m-0">
           <code>
             <SyntaxHighlight code={code} />
           </code>

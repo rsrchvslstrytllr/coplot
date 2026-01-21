@@ -1,17 +1,11 @@
 import React from 'react';
 
-function ControlsPanel({ chartType, config, onChange, onReset }) {
+function ControlsPanel({ chartType, config, onChange }) {
   return (
     <div className="w-64 border-r border-black flex flex-col h-screen sticky top-0 flex-shrink-0">
       {/* Header - same height as sidebar header */}
-      <div className="h-14 px-4 border-b border-black flex items-center justify-between">
+      <div className="h-14 px-4 border-b border-black flex items-center">
         <h2 className="text-sm font-medium">{chartType.name}</h2>
-        <button
-          onClick={onReset}
-          className="text-xs px-2 py-1 border border-black hover:bg-gray-100 transition-colors"
-        >
-          Reset
-        </button>
       </div>
 
       {/* Scrollable controls */}

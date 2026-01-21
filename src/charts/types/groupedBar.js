@@ -21,12 +21,24 @@ import {
   titleCode,
   gridCode,
   axisLabelsCode,
-  yAxisRangeCode,
   referenceLineCode,
   labelRotationCode,
   spineCode,
   finishCode,
 } from '../shared/codeSnippets';
+
+import {
+  seabornSetup,
+  seabornCreateFigure,
+  seabornTitleCode,
+  seabornGridCode,
+  seabornAxisLabelsCode,
+  seabornYAxisRangeCode,
+  seabornReferenceLineCode,
+  seabornLabelRotationCode,
+  seabornSpineCode,
+  seabornFinishCode,
+} from '../shared/seabornSnippets';
 
 import { interpolatePalette, BLUES_PALETTE, REDS_PALETTE, GREENS_PALETTE, MULTI_PALETTE } from '../shared/palettes';
 
@@ -36,7 +48,7 @@ const showLegendControl = {
   type: 'toggle',
 };
 
-export default {
+const groupedBar = {
   id: 'grouped-bar',
   name: 'Grouped Bar Chart',
   category: 'bar',
@@ -56,6 +68,7 @@ export default {
     useGreensPalette: false,
     numCategories: 4,
     numSeries: 3,
+    outputFormat: 'matplotlib',
     labelRotation: 0,
     showGrid: true,
     showValues: false,
@@ -104,6 +117,56 @@ export default {
     // Generate category labels
     const categories = Array.from({ length: numCategories }, (_, i) => `Group ${i + 1}`);
     
+    // Seaborn output - uses long-form DataFrame (much cleaner!)
+    if (config.outputFormat === 'seaborn') {
+      // Generate data rows for long-form DataFrame
+      const dataRows = [];
+      for (let i = 0; i < numCategories; i++) {
+        for (let j = 0; j < numSeries; j++) {
+          const value = (75 + Math.random() * 20).toFixed(1);
+          dataRows.push(`    {'group': 'Group ${i + 1}', 'series': 'Series ${j + 1}', 'value': ${value}}`);
+        }
+      }
+      
+      return `${seabornSetup()}
+
+# ======== ADD YOUR DATA HERE ========
+# Long-form DataFrame (each row is one observation)
+df = pd.DataFrame([
+${dataRows.join(',\n')}
+])
+# ====================================
+${seabornCreateFigure()}
+
+# ${paletteName} palette (${numSeries} interpolated colors)
+palette = ${JSON.stringify(colors)}
+
+# Create grouped bar chart
+sns.barplot(data=df, x='group', y='value', hue='series', palette=palette,
+            edgecolor='#000000', linewidth=1.0, ax=ax)
+${seabornTitleCode(config)}
+${seabornAxisLabelsCode(config)}
+${seabornLabelRotationCode(config)}
+
+# Add grid
+${seabornGridCode(config, 'y')}
+
+${config.showValues ? `# Add value labels on bars
+for container in ax.containers:
+    ax.bar_label(container, fmt='%.${config.valueDecimals || 1}f', fontsize=9, color='#000000', padding=2)` : '# Value labels disabled'}
+
+# Set y-axis range
+${seabornYAxisRangeCode(config)}
+
+${config.showLegend ? `# Customize legend
+ax.legend(title='', loc='upper right', fontsize=10)` : `# Remove legend
+ax.legend_.remove()`}
+${seabornReferenceLineCode(config, 'horizontal')}
+${seabornSpineCode()}
+${seabornFinishCode('grouped_bar_chart')}`;
+    }
+    
+    // Matplotlib output (default)
     // Generate series data
     const seriesCode = Array.from({ length: numSeries }, (_, i) => {
       const values = Array.from({ length: numCategories }, () => (75 + Math.random() * 20).toFixed(1));
@@ -165,3 +228,5 @@ ${spineCode()}
 ${finishCode('grouped_bar_chart')}`;
   },
 };
+
+export default groupedBar;

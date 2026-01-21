@@ -29,7 +29,20 @@ import {
   valueLabelsCode,
 } from '../shared/codeSnippets';
 
-import { generateColorCode } from '../shared/palettes';
+import {
+  seabornSetup,
+  seabornCreateFigure,
+  seabornTitleCode,
+  seabornGridCode,
+  seabornAxisLabelsCode,
+  seabornYAxisRangeCode,
+  seabornReferenceLineCode,
+  seabornLabelRotationCode,
+  seabornSpineCode,
+  seabornFinishCode,
+} from '../shared/seabornSnippets';
+
+import { generateColorCode, interpolatePalette, BLUES_PALETTE, REDS_PALETTE, GREENS_PALETTE, MULTI_PALETTE } from '../shared/palettes';
 
 // Generate dynamic sample data based on numCategories
 function generateSampleData(n) {
@@ -65,6 +78,7 @@ const verticalBar = {
     useRedsPalette: false,
     useGreensPalette: false,
     numCategories: 5,
+    outputFormat: 'matplotlib',
     labelRotation: 0,
     showGrid: true,
     showValues: false,
@@ -97,6 +111,63 @@ const verticalBar = {
     const categories = Array.from({ length: n }, (_, i) => `Cat ${i + 1}`);
     const values = Array.from({ length: n }, () => (75 + Math.random() * 20).toFixed(1));
     
+    // Get palette colors
+    let palette = MULTI_PALETTE;
+    let paletteName = 'Multi-color';
+    if (config.useBluesPalette) { palette = BLUES_PALETTE; paletteName = 'Blues'; }
+    else if (config.useRedsPalette) { palette = REDS_PALETTE; paletteName = 'Reds'; }
+    else if (config.useGreensPalette) { palette = GREENS_PALETTE; paletteName = 'Greens'; }
+    
+    const usesPalette = config.useBluesPalette || config.useRedsPalette || config.useGreensPalette || config.useMultiColor;
+    const colors = usesPalette ? interpolatePalette(palette, n) : null;
+    
+    // Seaborn output
+    if (config.outputFormat === 'seaborn') {
+      const orderCode = config.barOrdering === 'ascending' 
+        ? `\ndf = df.sort_values('value', ascending=True)`
+        : config.barOrdering === 'descending'
+          ? `\ndf = df.sort_values('value', ascending=False)`
+          : '';
+      
+      const paletteCode = usesPalette 
+        ? `palette = ${JSON.stringify(colors)}  # ${paletteName} palette`
+        : `palette = ['${config.color || '#4C6EE6'}'] * len(df)  # Single color`;
+      
+      return `${seabornSetup()}
+
+# ======== ADD YOUR DATA HERE ========
+df = pd.DataFrame({
+    'category': ${JSON.stringify(categories)},
+    'value': [${values.join(', ')}]
+})
+# ====================================${orderCode}
+${seabornCreateFigure()}
+
+# Define colors
+${paletteCode}
+
+# Create bar chart
+sns.barplot(data=df, x='category', y='value', palette=palette, 
+            edgecolor='#000000', linewidth=1.0, ax=ax)
+${seabornTitleCode(config)}
+${seabornAxisLabelsCode(config)}
+${seabornLabelRotationCode(config)}
+
+# Add grid
+${seabornGridCode(config, 'y')}
+
+${config.showValues ? `# Add value labels on bars
+for container in ax.containers:
+    ax.bar_label(container, fmt='%.${config.valueDecimals || 1}f', fontsize=10, color='#000000', padding=3)` : '# Value labels disabled'}
+
+# Set y-axis range
+${seabornYAxisRangeCode(config)}
+${seabornReferenceLineCode(config, 'horizontal')}
+${seabornSpineCode()}
+${seabornFinishCode('vertical_bar_chart')}`;
+    }
+    
+    // Matplotlib output (default)
     return `${matplotlibSetup()}
 
 # ======== ADD YOUR DATA HERE ========

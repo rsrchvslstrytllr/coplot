@@ -23,7 +23,7 @@ import {
   finishCode,
 } from '../shared/codeSnippets';
 
-export default {
+const histogram = {
   id: 'histogram',
   name: 'Histogram',
   category: 'histogram',
@@ -114,3 +114,5 @@ ${spineCode()}
 ${finishCode('histogram')}`;
   },
 };
+
+export default histogram;
